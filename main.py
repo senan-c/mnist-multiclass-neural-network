@@ -72,3 +72,24 @@ class MCNeuralNetwork:
 
         #Calculating softmax for batch processing
         return exp_z / np.sum(exp_z, axis=0, keepdims=True)
+    
+    @staticmethod
+    def ReLU(z):
+        #ReLU activation function
+        return np.maximum(0, z)
+    
+    def feed_forward(self, A0, length):
+        cache = [A0]
+        #Calculating the activations for each layer
+        for i in range(length):
+            if i != length - 1:
+                Z = np.dot(self.weights[i], cache[i]) + self.biases[i]
+                A = self.ReLU(Z)
+                #Storing the activations in a cache for backprop
+                cache.append(A)
+
+            else:
+                Z = np.dot(self.weights[i], cache[i]) + self.biases[i]
+                A_last = self.batch_softmax(Z)
+
+        return A_last, cache
