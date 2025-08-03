@@ -39,4 +39,36 @@ class MCNeuralNetwork:
         self.nodes = nodes
         self.length = len(nodes) - 1
         self.test_features, self.test_labels, self.valid_features, self.valid_labels, self.train_features, self.train_labels = load_data()
+        self.weights = []
+        self.biases = []
 
+        #Initialising weights and biases
+        for i in range(self.length):
+            B = np.random.randn(nodes[i + 1], 1)
+            self.biases.append(B)
+
+            #Using HE initialisation for use with ReLU
+            W = np.random.randn(nodes[i + 1], nodes[i]) * np.sqrt(2 / nodes[i])
+            self.weights.append(W)
+
+    @staticmethod
+    def cost(y_hat, y, m):
+        #Clipping predictions to avoid log(0)
+        y_hat = np.clip(y_hat, 1e-12, 1 - 1e-12)
+
+        #Categorical cross-entropy loss
+        loss = np.sum(y * np.log(y_hat)) / m
+
+        #Returning the negative loss
+        return loss * -1
+    
+    @staticmethod
+    def batch_softmax(z):
+        #Finding the max value in each batch
+        max_z = np.max(z, axis=0, keepdims=True)
+
+        #Subtracting max from each value for numerical stability
+        exp_z = np.exp(z - max_z)
+
+        #Calculating softmax for batch processing
+        return exp_z / np.sum(exp_z, axis=0, keepdims=True)
