@@ -93,3 +93,70 @@ class MCNeuralNetwork:
                 A_last = self.batch_softmax(Z)
 
         return A_last, cache
+    
+    def backprop(self, A0, labels, alpha, m):
+        y_hat, cache = self.feed_forward(A0, self.length)
+
+        error = self.cost(y_hat, labels)
+
+        for i in range(self.length, 0, -1):
+            if i == self.length:
+                #For the output layer, we do not apply any function
+                A = y_hat
+                A_back = cache[i - 1]
+                
+                #Calculating the gradient of the cost with respect to the activation of this layer
+                dCost_dOut = (1 / m) * (A - labels)
+                assert dCost_dOut.shape == (self.nodes[i], m)
+
+                #Calculating the gradient of the output layer with respect to the activation of the previous layer
+                dOut_dWeight = A_back
+                assert dOut_dWeight.shape == (self.nodes[i - 1], m)
+
+                #Calculating the gradient of the cost with respect to the weights of this layer
+                dCost_dWeight = np.dot(dCost_dOut, dOut_dWeight.T)
+                assert dCost_dWeight.shape == (self.nodes[i], self.nodes[i - 1])
+
+                #Calculating the gradient of the cost with respect to the biases of this layer
+                dCost_dBias = np.sum(dCost_dOut, axis=1, keepdims=True)
+                assert dCost_dBias.shape == (self.nodes[i], 1)
+
+                #Calculating the gradient of the cost with respect to the activation of previous layer
+                dCost_dA_back = np.dot(self.weights[i - 1].T, dCost_dOut)
+                assert dCost_dA_back.shape == (self.nodes[i - 1], m)
+
+                #Updating the weights and biases
+                self.weights[i - 1] -= alpha * dCost_dWeight
+                self.biases[i - 1] -= alpha * dCost_dBias
+
+            else:
+                A = cache[i]
+
+                if i == 1:
+                    A_back = A0
+
+                else:
+                    A_back = cache[i - 1]
+
+                #Calculating the gradient of the cost with respect to the activation of this layer
+                dA_dCost = (A > 0).astype(float)
+                dReLU = dCost_dA_back * dA_dCost
+                assert dReLU.shape == (self.nodes[i], m)
+
+                #Calculating the gradient of the output layer with respect to the activation of the previous layer
+                dOut_dWeight = cache[i - 1]
+                dCost_dWeight = np.dot(dReLU, dOut_dWeight.T)
+                assert dCost_dWeight.shape == (self.nodes[i], self.nodes[i - 1])
+
+                #Calculating the gradient of the cost with respect to the biases of this layer
+                dCost_dBias = np.sum(dReLU, axis=1, keepdims=True)
+                assert dCost_dBias.shape == (self.nodes[i], 1)
+
+                dCost_dA_back = np.dot(self.weights[i - 1].T, dReLU)
+                assert dCost_dA_back.shape == (self.nodes[i - 1], m)
+
+                #Updating the weights and biases
+                self.weights[i - 1] -= alpha * dCost_dWeight
+                self.biases[i - 1] -= alpha * dCost_dBias
+
+        return error
