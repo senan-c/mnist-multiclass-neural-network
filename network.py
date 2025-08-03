@@ -1,5 +1,6 @@
 from sklearn.datasets import fetch_openml
 import numpy as np
+import matplotlib.pyplot as plt
 import time
 
 def one_hot_encode(labels, num_classes=10):
@@ -22,10 +23,10 @@ def load_data():
     labels = labels.astype(int)
 
     #Shuffling the data
-    shuffle = np.arange(len(features))
-    np.random.shuffle(shuffle)
-    features = features[shuffle]
-    labels = labels[shuffle]
+    indices = np.arange(len(features))
+    np.random.shuffle(indices)
+    features = features[indices]
+    labels = labels[indices]
 
     #Splitting the data into training, validation, and testing
     length = features.shape[0]
@@ -59,7 +60,7 @@ class MCNeuralNetwork:
 
         #Initialising weights and biases
         for i in range(self.length):
-            B = np.random.randn(1, self.nodes[i + 1])
+            B = np.zeros((1, self.nodes[i + 1]))
             self.biases.append(B)
 
             #Using HE initialisation for use with ReLU
@@ -178,9 +179,29 @@ class MCNeuralNetwork:
         #Calculating the accuracy by comparing the predicted and correct classes
         return np.mean(outputs == correct)
     
+    def show_misclassified(self, num=7):
+        y_hat, _ = self.feed_forward(self.test_features, self.length)
+        #Using argmax to find the predicted class
+        predictions = np.argmax(y_hat, axis=1)
+
+        #Finding the actual classes from the one-hot encoded labels
+        actuals = np.argmax(self.test_labels, axis=1)
+
+        #Finding the indices of misclassified samples
+        wrong = np.where(predictions != actuals)[0]
+
+        for i in wrong[:num]:
+            #Displaying the misclassified samples
+            plt.imshow(self.test_features[i].reshape(28, 28), cmap='gray')
+            plt.title(f"Predicted: {predictions[i]}, Actual: {actuals[i]}")
+            plt.axis('off')
+            plt.show()
+    
     def train(self, epochs, alpha, batch_size):
         m = self.train_features.shape[0]
         total_samples = 0
+        costs = []
+        accuracies = []
 
         for e in range(epochs + 1):
             #Getting the start time each epoch
@@ -211,17 +232,32 @@ class MCNeuralNetwork:
                 total_cost += error
                 num_batches += 1
 
+            #Calculating the average cost and accuracy for the epoch
             avg_cost = total_cost / num_batches
+            val_acc = self.accuracy(self.valid_features, self.valid_labels)
 
             if e % 5 == 0:
-                val_acc = self.accuracy(self.valid_features, self.valid_labels)
+                #Printing every 5 epochs
                 elapsed = time.time() - epoch_start
                 print(f"Epoch {e:02}/{epochs} - Cost: {round(avg_cost, 6)} - Val Acc: {val_acc * 100:.4f}% - Time: {elapsed:.2f}s")
 
+            costs.append(avg_cost)
+            accuracies.append(val_acc)
+
         print("\nTotal Samples Processed:", total_samples)
+
+        #Plotting the training cost and accuracy over epochs on a line graph
+        plt.plot(range(epochs + 1), costs, label="Cost")
+        plt.plot(range(epochs + 1), accuracies, label="Accuracy")
+        plt.xlabel("Epoch")
+        plt.ylabel("Metric")
+        plt.title("Training Cost and Accuracy over Epochs")
+        plt.grid(True)
+        plt.show()
+
+        self.show_misclassified(5)
 
     def test(self):
         #Calculating the accuracy on the test set
         test_acc = self.accuracy(self.test_features, self.test_labels)
         print(f"Test Accuracy: {test_acc * 100:.4f}%")
-        

@@ -17,9 +17,13 @@ while choice != 4:
         net.train(epochs, alpha, batch_size=128)
 
     elif choice == 2:
+        nodes = [784]
+
         length = int(input("Enter the number of layers: "))
         for i in range(length - 1):
-            nodes[i + 1] = int(input(f"Enter the number of nodes in hidden layer {i + 1}: "))
+            nodes.append(int(input(f"Enter the number of nodes in hidden layer {i + 1}: ")))
+
+        nodes.append(10)
 
         epochs = int(input("Enter the number of epochs: "))
         alpha = float(input("Enter the learning rate: "))
