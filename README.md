@@ -1,1 +1,11 @@
 # mnist-multiclass-neural-network
+
+I built this multi-classification neural network to classify handwritten numbers taken from the **MNIST dataset**, while using only **NumPy**. For this project I chose a class-based structure so as to encapsulate my network for easier usability and readability. It can be ran from the `main.py` file and input is taken from the CLI to allow the user to control and modify the network without having to reload the data after each change. Here the network can be trained, tested, hyperparameters can be changed, and the dataset can be reloaded and reshuffled. After each training run the results will output both as **text and a line graph**, and several examples of **misclassified numbers** will be presented to the user.
+
+Due to the complexity of this neural network I first built a **binary-classification network** upon which this version is based. Since the binary-classification network was built with scalability in mind, I could take concepts like my **backpropagation and feedforward algorithms** and simply upgrade them using new formulas such as **ReLU, Softmax, and Categorical Cross-Entropy**. These new formulas meant that I had to learn and apply concepts such as **one-hot encoding** and **HE initialisation** which resulted in me learning much more about machine learning during my time spent on this project. Another new addition was the concept of **mini-batching**, which I chose to apply after seeing the size of the MNIST dataset.
+
+The extensive research I put into this project and the efforts I went to understand the inner workings of a multi-classification network allowed me to reach **95% testing accuracy**, despite not using any frameworks. While training and testing my neural network I also greatly developed my understanding of **validation**, particularly regarding **overfitting and underfitting**, which was previously a gap in my knowledge. In conclusion I believe this project was a **huge success**, and I was able to achieve all of the goals I had when I began.
+
+![Train-Test-Example](https://github.com/user-attachments/assets/9a81be82-4e8b-4fa9-a398-755afc1c66ec)  
+*An example of training and testing the model on starting hyperparameters*
+
